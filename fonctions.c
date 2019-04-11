@@ -73,9 +73,9 @@ SDL_Flip(acteurs.screen);
 
 void updatePlayer(Hero* hero , Acteurs* acteurs, SDL_Rect camera)
 {
-	if(acteurs->event.type == SDL_KEYDOWN)
+	if(acteurs->event.type == SDL_MOUSEBUTTONDOWN)
 	{
-		if(acteurs->event.key.keysym.sym == SDLK_RIGHT)
+		if(acteurs->event.button.button == SDL_BUTTON_RIGHT)
 		{
 			if(hero->etat == IMMOBILE || hero->etat == WALK_LEFT)
 			{
@@ -95,7 +95,7 @@ void updatePlayer(Hero* hero , Acteurs* acteurs, SDL_Rect camera)
 					hero->x = Backg_W - PLAYER_WIDTH ;
 				}
 		}
-		else if(acteurs->event.key.keysym.sym == SDLK_LEFT)
+		else if(acteurs->event.button.button == SDL_BUTTON_LEFT)
 		{
 			if(hero->etat == IMMOBILE || hero->etat == WALK_RIGHT)
 			{
@@ -115,7 +115,7 @@ void updatePlayer(Hero* hero , Acteurs* acteurs, SDL_Rect camera)
 				}
 		}
 	}
-	else if(acteurs->event.type == SDL_KEYUP)
+	else if(acteurs->event.type == SDL_MOUSEBUTTONUP)
 	{
 		if(hero->etat != IMMOBILE)
 		{
@@ -137,14 +137,14 @@ void updatePlayer(Hero* hero , Acteurs* acteurs, SDL_Rect camera)
 
 void animation(Hero* hero, Acteurs acteurs)
 {
-	if(acteurs.event.type == SDL_KEYDOWN)
+	if(acteurs.event.type == SDL_MOUSEBUTTONDOWN)
 	{
-		if(acteurs.event.key.keysym.sym == SDLK_LEFT || acteurs.event.key.keysym.sym == SDLK_RIGHT)
+		if(acteurs.event.button.button == SDL_BUTTON_LEFT || acteurs.event.button.button == SDL_BUTTON_RIGHT)
 		{
 			if(hero->frame_timer <= 0)
 			{
 				hero->frame_number++;
-			if(hero->frame_number > MAXF)
+			if(hero->frame_number > MAXF-1)
 				hero->frame_number = 0;
 			}
 		else
@@ -152,7 +152,7 @@ void animation(Hero* hero, Acteurs acteurs)
 		}
 	}
 	
-	if(acteurs.event.type == SDL_KEYUP)
+	if(acteurs.event.type == SDL_MOUSEBUTTONUP)
 	{
 		if(hero->direction == RIGHT)
 		{
@@ -160,7 +160,7 @@ void animation(Hero* hero, Acteurs acteurs)
 		}
 		else if(hero->direction == LEFT)
 		{
-			hero->frame_number = MAXF;
+			hero->frame_number = MAXF-1;
 		}
 	}
 }

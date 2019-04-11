@@ -13,13 +13,13 @@
 *//////////
 
 
-#define TIME_BETWEEN_2_FRAMES 18
+#define TIME_BETWEEN_2_FRAMES 10
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
-#define PLAYER_WIDTH 72
-#define PLAYER_HEIGHT 400
-#define PLAYER_SPEED 5
+#define PLAYER_WIDTH 100
+#define PLAYER_HEIGHT 200
+#define PLAYER_SPEED 8
 
 
 enum{WALK_RIGHT, WALK_LEFT, IMMOBILE, JUMP};
@@ -33,8 +33,8 @@ enum{WALK_RIGHT, WALK_LEFT, IMMOBILE, JUMP};
 #define RIGHT 1
 #define LEFT 2
 
-/*#define ENEMY_Height 80
-#define ENEMY_Width 80*/
+#define ENEMY_Height 80
+#define ENEMY_Width 80
 
 #define Backg_W 8000
 #define Backg_H 600
@@ -109,7 +109,7 @@ void centerScrollingOnPlayer(Hero hero, Acteurs* acteurs, SDL_Rect* camera);
 
 //SDL_Rect AnimationHero(Hero hero);
 
-void animation(Hero* hero, Acteurs acteurs);
+void animation(Hero* hero, Acteurs acteurs) ; 
 
 //SDL_Rect AnimationHeroRight(Hero hero, Acteurs acteurs);
 
