@@ -1,176 +1,366 @@
-#include <SDL/SDL.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include "SDL/SDL_mixer.h"
+#include "animation.h"
+#include "scrolling.h"
 
-int collision(SDL_Rect* rect1,SDL_Rect* rect2)
+
+
+
+int main ()
 {
-        if(rect1->y >= rect2->y + rect2->h)
-                return 0;
-        if(rect1->x >= rect2->x + rect2->w)
-                return 0;
-        if(rect1->y + rect1->h <= rect2->y)
-                return 0;
-        if(rect1->x + rect1->w <= rect2->x)
-                return 0;
-        return 1;
-}
-int collision_trigo(SDL_Surface *perso, SDL_Surface *enemie, SDL_Rect posp, SDL_Rect pose)
+
+SDL_Surface *screen=NULL,*level1=NULL ;
+Perso sprite,start,settings,quitter,jour,set,nuit,newgame,sousmenu,loadgame,clavier,load_newgame,souris,manette,enemy_D[20],box,box2,win ;
+int run= 1 ,i=2,curseur=1,actuel,prec,starting=0 ,running2=1,save=2,settingss=0,j=0,k=0,souris1=0,manette1=0,clavier1=0,level=1,nb_life,score_finale,seconde,minute,run2=1 ;
+SDL_Event event ;
+SDL_Rect posfond,positionFond ;
+Mix_Chunk *effect ;
+  win.image=IMG_Load("chaima.png") ;
+  win.p.x=0;
+  win.p.y=0 ;
+SDL_Init(SDL_INIT_EVERYTHING) ;
+
+SDL_EnableKeyRepeat(100,100) ;
+intialiser_menu (&start,&settings,&quitter,&jour ,&nuit ,&set,&load_newgame,&sousmenu,&newgame,&loadgame,&clavier,&souris,&manette) ;
+music() ;
+effect= Mix_LoadWAV("futuresoundfx-13.wav");
+
+Mix_Volume(1,50); 
+screen=SDL_SetVideoMode(1280,720,32,SDL_DOUBLEBUF |SDL_HWSURFACE) ;
+render_menu (screen,start,settings,quitter,jour,nuit ,set,curseur,i)  ;
+while (run)
 {
-    int ra,rb,xb,xa,ya,yb,distance;
-    ra=(perso->w)/2;
-    xa=(posp.x+(perso->w/2));
-    ya=(posp.y+(perso->h/2));
-    rb=(enemie->w)/2;
-    xb=(pose.x+(enemie->w/2));
-    yb=(pose.y+(enemie->h/2));
-    distance=((xa-xb)*(xa-xb)+( ya+yb)*( ya+yb));
 
+                    SDL_WaitEvent(&event) ;
+                      switch(event.type)
+               {
+                 case SDL_QUIT:
+                 run = 0 ;
+                 break;
+                 case SDL_KEYDOWN :
+                switch(event.key.keysym.sym)
+                {
+                 case SDLK_UP :
+                 Mix_PlayChannel(1,effect,0);
+                   curseur--  ;
+                   if(curseur<1)
+                   curseur=3 ;
+                 render_menu (screen,start,settings,quitter,jour,nuit ,set,curseur,i)  ;
+                 break ;
+                 case SDLK_DOWN :
+                 Mix_PlayChannel(1,effect,0);
 
-    if(distance<=(ra+rb)*(ra+rb))
-    {
-        return 1 ;
-    }
-    else
-    {
-        return 0;
-    }
-}
+                   curseur++ ;
+                   if(curseur>3)
+                   curseur=1 ;
+                 render_menu (screen,start,settings,quitter,jour,nuit ,set,curseur,i)  ;
+                  break ;
+                 case SDLK_RETURN :
+                   if(curseur==1)
+                    starting=1 ;
+                  else if(curseur==3) 
+                    run=0 ;
+                  else if(curseur==2) 
+                    settingss=1 ;
+                  break ;
+                }
+                case SDL_MOUSEMOTION  :
 
- 
-int width = 640;
-int height = 480;
- 
-int main(int argc, char** argv)
-{
-        SDL_Init(SDL_INIT_EVERYTHING);
-        SDL_Surface *screen;
+                 if(event.motion.x>858 && event.motion.y>267 && event.motion.x<858+351 && event.motion.y<267+117 )
+                 {
+                   if(curseur!=1)
+                   {
+                    curseur=1 ;
+                    Mix_PlayChannel(1,effect,0);
+                    render_menu (screen,start,settings,quitter,jour,nuit ,set,curseur,i)  ;
+                   }
+                 }
+                    
+                         
+                
+                 else if(event.motion.x>860 && event.motion.y>421 && event.motion.x<858+351 && event.motion.y<421+117 )
+                 {
+                   if(curseur!=2)
+                   {
+                    curseur=2 ;
+                    Mix_PlayChannel(1,effect,0);
+                    render_menu (screen,start,settings,quitter,jour,nuit ,set,curseur,i)  ;
+                   }
+                    
+                 } 
+                 else if(event.motion.x>860 && event.motion.y>560 && event.motion.x<858+351 && event.motion.y<560+117 )
+                 {
+                   if(curseur!=3)
+                   {
+                    curseur=3 ;
+                    Mix_PlayChannel(1,effect,0);
+                    render_menu (screen,start,settings,quitter,jour,nuit ,set,curseur,i)  ;
+                   }
+                 }
+                break ; 
+                case SDL_MOUSEBUTTONDOWN :
+                 if(event.button.button == SDL_BUTTON_LEFT)
+                 {
+                    if(curseur==1)
+                    starting=1 ;
+                  else if(curseur==3) 
+                    run=0 ;
+                  else if(curseur==2) 
+                    settingss=1 ;                  
+                 }
+                break ;
+                
+                break  ;
+               }
 
-        screen = SDL_SetVideoMode(width, height, 32, SDL_SWSURFACE);
-        int running = 1;
-        const int FPS = 30;
-        Uint32 start;
-        int b[4] = {0,0,0,0};
-        SDL_Rect rect;
-        rect.x = 10;
-        rect.y = 10;
-        rect.w = 20;
-        rect.h = 20;
-         SDL_Rect recarr[5];
-        recarr[0].x=70;
-        recarr[0].y=0;
-        recarr[0].h=200;
-        recarr[0].w=10;
- 
-        recarr[1].x=300;
-        recarr[1].y=200;
-        recarr[1].h=20;
-        recarr[1].w=80;
- 
-        recarr[2].x=200;
-        recarr[2].y=100;
-        recarr[2].h=100;
-        recarr[2].w=10;
- 
-        recarr[3].x=40;
-        recarr[3].y=300;
-        recarr[3].h=20;
-        recarr[3].w=60;
- 
-        recarr[4].x=100;
-        recarr[4].y=0;
-        recarr[4].h=200;
-        recarr[4].w=10;
+                     actuel = SDL_GetTicks();
+                      if (actuel - prec > 3000)
+                         { 
+                           i++ ;
+                           if(i>3)                          
+                            i=1 ;
 
+                           prec = actuel;
+                         }
+                     if(starting)
+                     {
+                       	   SDL_BlitSurface(newgame.image,NULL,screen,&(newgame.p)) ;
+							             SDL_Flip (screen) ;
+                       running2=1 ;
+                       while (running2)
+						             	{
 
- int i=0;
-        Uint32 color2 = SDL_MapRGB(screen->format, 255,255,255);
-        Uint32 color = SDL_MapRGB(screen->format, 0,0,0);
-        for(i = 0; i < 5; i += 1) {
-              SDL_FillRect(screen,&recarr[i],color2);
-        }
-        while(running) {
-                start = SDL_GetTicks();
+                           SDL_WaitEvent(&event) ;
+            
+                       switch(event.type)
+                        {
+													case SDL_QUIT:
+                           running2=0 ;
+                           save=2 ;
+													break ;
+													case SDL_KEYDOWN :
+                           switch (event.key.keysym.sym)
+													 {
+                           case SDLK_ESCAPE :
+                            running2=0 ;
+                            save=2 ;
+                           break ;  
+													 case SDLK_RIGHT:
+                              Mix_PlayChannel(1,effect,0);
 
-                SDL_Event event;
-                while(SDL_PollEvent(&event)) {
-                        switch(event.type) {
-                                case SDL_QUIT:
-                                        running = 0;
-                                        break;
-                                case SDL_KEYDOWN:
-                                        switch(event.key.keysym.sym) {
-                                                case SDLK_UP:
-                                                        b[0] = 1;
-                                                        break;
-                                                case SDLK_LEFT:
-                                                        b[1] = 1;
-                                                        break;
-                                                case SDLK_DOWN:
-                                                        b[2] = 1;
-                                                        break;
-                                                case SDLK_RIGHT:
-                                                        b[3] = 1;
-                                                        break;
-                                       
-                                        }
-                                        break;
-                                case SDL_KEYUP:
-                                        switch(event.key.keysym.sym) {
-                                                case SDLK_UP:
-                                                        b[0] = 0;
-                                                        break;
-                                                case SDLK_LEFT:
-                                                        b[1] = 0;
-                                                        break;
-                                                case SDLK_DOWN:
-                                                        b[2] = 0;
-                                                        break;
-                                                case SDLK_RIGHT:
-                                                        b[3] = 0;
-                                                        break;
-                                       
-                                        }
-                                        break;
+													 save=0 ;  
+                           j=0 ;
+													 break;
+													 
+													 case SDLK_LEFT :
+                           Mix_PlayChannel(1,effect,0);
+													 save= 1 ;
+                           j=1 ;
+													 break;
+													 case SDLK_RETURN :
+                            if(save==1 || save==0)
+														running2=0 ;
+													 break ;
+													 }
+													break ;
+												}
+                        if(running2!=0)
+                        {
+                          if(j==1)
+                         SDL_BlitSurface(loadgame.image,NULL,screen,&(loadgame.p));
+                         else if (j==0)
+                          SDL_BlitSurface(newgame.image,NULL,screen,&(newgame.p));  
+
+                          SDL_Flip(screen) ;
                         }
-                }
+                        if(running2==0 &&(save==1 ||save==0))
+                        {
+                          running2=1 ;
+                          if(save)
+                          {
+                            FILE *f=fopen("save_file","r") ; 
+                             fscanf(f,"%hd %hd %hd %hd %hd %hd %hd %hd %hd %hd %d %d %d %d %d",&(positionFond.x),&(positionFond.y),&(sprite.p.x),&(sprite.p.y),&(enemy_D[0].p.x),&(enemy_D[0].p.y),&(box.p.x),&(box.p.y),&(box2.p.x),&(box2.p.y),&(nb_life),&(score_finale),&seconde,&minute,&level) ;
+                             fclose(f) ; 
+                             if(level==1)
+                               level=scroll1(screen,level1 ,&running2,posfond,save,level) ;                                                      
+                             if(level==2)
+								               {
+								                 running2=1 ;
+                                 level=scroll2(screen,level1 ,&running2,posfond,save,level) ;
+								                  level=3 ;
+							                	}                                                                
+                            if(level==3)
+								               {
+									              running2=1 ;
+                                level=scroll3(screen,level1 ,&running2,posfond,save,level) ;
+                             if(save==1) 
+                             {  
+                      while (run2 )
+  {
+    SDL_BlitSurface(win.image,NULL,screen,&(win.p)) ;
+    SDL_Flip(screen) ;
+    SDL_WaitEvent(&event) ;
+                               switch(event.type)
+                                 {
+                                   
+                                   case SDL_QUIT :
+                                      run2=0 ;
+                                   break ;
+                                   case SDL_KEYDOWN:
+
+                                    switch(event.key.keysym.sym)
+
+
+                                       {
+                                           case SDLK_ESCAPE :
+                                           run2=0 ;
+                                           break ;
+                                       }
+                                      
+                                      
+                                      break ;
+                                 }
+    }
+                             }
+								               }
+                          }
+                          else
+                          {
+                           level=scroll1(screen,level1 ,&running2,posfond,save,level) ;                                                      
+                             if(level==2)
+								               {
+								                 running2=1 ;
+                                 level=scroll2(screen,level1 ,&running2,posfond,save,level) ;
+								                  level=3 ;
+							                	}                                                                
+                            if(level==3)
+								               {
+									              running2=1 ;
+                                level=scroll3(screen,level1 ,&running2,posfond,save,level) ;
+                                if( save==1)
+                                {
+                     while (run2 )
+  {
+    SDL_BlitSurface(win.image,NULL,screen,&(win.p)) ;
+    SDL_Flip(screen) ;
+    SDL_WaitEvent(&event) ;
+                               switch(event.type)
+                                 {
+                                   
+                                   case SDL_QUIT :
+                                      run2=0 ;
+                                   break ;
+                                   case SDL_KEYDOWN:
+
+                                    switch(event.key.keysym.sym)
+
+
+                                       {
+                                           case SDLK_ESCAPE :
+                                           run2=0 ;
+                                           break ;
+                                       }
+                                      
+                                      
+                                      break ;
+                                 }
+    }
+                                }                                
+								               }                            
+                          }
+                          
+
+                        }
  
-                SDL_FillRect(screen, &rect, color);
- 
-                //logic
-                if(b[0]) {
-int i=0;
-                        rect.y--;
-                        for( i = 0; i < 5; i ++)
-                                {if(collision(&rect,&recarr[i]))
-                                        rect.y++;}
-                }
-                if(b[1]) {
-                        rect.x--;
-                        for(i = 0; i < 5; i += 1)
-                                {if(collision(&rect,&recarr[i]))
-                                        rect.x++;}
-                }
-                if(b[2]) {
-                        rect.y++;
-                        for(i = 0; i < 5; i += 1)
-                               { if(collision(&rect,&recarr[i]))
-                                        rect.y--;}
-                }
-                if(b[3]) {
-                        rect.x++;
-                        for(i = 0; i < 5; i += 1)
-                                {if(collision(&rect,&recarr[i]))
-                                        rect.x--;}
-                }
- 
- 
-                //render
-                SDL_FillRect(screen, &rect, color2);
-                SDL_Flip(screen);
- 
-                if(1000/FPS > SDL_GetTicks()-start) {
-                        SDL_Delay(1000/FPS-(SDL_GetTicks()-start));
-                }
-        }
-        SDL_Quit();
-        return 0;
+						 	          }
+                         render_menu (screen,start,settings,quitter,jour,nuit ,set,curseur,i)  ;
+                         starting=0 ;
+                     }  
+                     if(settingss)
+                     {
+						               SDL_BlitSurface(sousmenu.image,NULL,screen,&(sousmenu.p)) ;
+							             SDL_Flip (screen) ;                       
+                        running2=1 ;
+                        while (running2)
+						             	{
+
+                           SDL_WaitEvent(&event) ;
+            
+                        switch(event.type)
+                        {
+													case SDL_QUIT:
+                           running2=0 ;
+													break ;
+													case SDL_KEYDOWN :
+                           switch (event.key.keysym.sym)
+													 {
+                           case SDLK_ESCAPE :
+                            running2=0 ;
+                           break ;  
+													 case SDLK_RIGHT:
+                           Mix_PlayChannel(1,effect,0);
+
+													  k++ ;
+                            if(k>3)
+                            k=1 ;
+													 break;
+													 case SDLK_LEFT :
+                            Mix_PlayChannel(1,effect,0);
+
+													  k-- ;
+                            if(k<1)
+                            k=3 ;													 
+													 break;
+													 case SDLK_RETURN :
+                            
+														running2=0 ;
+													 break ;
+													 }
+													break ;
+												}
+                       if(k==1)
+                         {
+			                     SDL_BlitSurface(souris.image,NULL,screen,&(souris.p)) ;
+                         } 
+                       if(k==2)
+                         {
+						               SDL_BlitSurface(clavier.image,NULL,screen,&(clavier.p)) ;        
+                         }
+                       if(k==3)
+                         {
+						              SDL_BlitSurface(manette.image,NULL,screen,&(manette.p)) ;                      
+                         }     
+                          SDL_Flip(screen) ;                            
+						             }
+                           if(k==1)
+                         {
+                          souris1=1 ;
+                          clavier1=0 ;
+                          manette1=0 ;
+                         }
+                          if(k==2)
+                         {
+                          souris1=0 ;
+                          clavier1=1 ;
+                          manette1=0 ;
+                         }
+                          if(k==3)
+                         {
+                          souris1=0 ;
+                          clavier1=0 ;
+                          manette1=1 ;
+                         }
+                    render_menu (screen,start,settings,quitter,jour,nuit ,set,curseur,i)  ;                        
+                       settingss=0 ;
+                     }                        
+
+                      
+}
+
+
+
+
 }
